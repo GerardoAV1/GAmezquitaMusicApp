@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -48,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example1.gamezquitamusicapp.components.AlbumCard
+import com.example1.gamezquitamusicapp.components.RecentlyPlayedCard
 import com.example1.gamezquitamusicapp.models.Albums
 import com.example1.gamezquitamusicapp.services.AlbumsService
 import com.example1.gamezquitamusicapp.ui.theme.GAmezquitaMusicAppTheme
@@ -72,18 +76,40 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainApp(){
-    Box(
+fun MainApp() {
+    // Estados y Retrofit
+    val BASE_URL = "https://music.juanfrausto.com/api/"
+    var albums by remember { mutableStateOf(listOf<Albums>()) }
+    var loading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        try {
+            Log.i("MainApp", "Creando Instancia de Retrofit")
+            val retrofit = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+            val service = retrofit.create(AlbumsService::class.java)
+            val result = withContext(Dispatchers.IO) { service.getAllAlbums() }
+            albums = result
+            loading = false
+        } catch (e: Exception) {
+            Log.e("MainApp", "Algo falló: ${e.message}")
+            loading = false
+        }
+    }
+
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF1E4FF))
+            .padding(horizontal = 25.dp, vertical = 42.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(start = 25.dp, end = 25.dp, top = 42.dp)
-                .fillMaxSize()
-        ) {
-            //HEADER Bienvenida
+
+
+        item {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(28.dp))
@@ -103,124 +129,106 @@ fun MainApp(){
                         .padding(20.dp)
                         .fillMaxSize()
                 ) {
-                    //Iconos
-                    Row(
-                        modifier = Modifier
-
-
-                    ) {
+                    Row {
                         Icon(
                             imageVector = Icons.Default.Menu,
                             contentDescription = "Menu",
                             tint = Color.White
                         )
-
                         Spacer(modifier = Modifier.weight(1f))
-
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
                             tint = Color.White
                         )
                     }
-                    //Texto de Bienvenida
                     Text(
-                        modifier = Modifier
-                            .padding(top = 9.dp),
                         text = "Good Morning!",
                         fontSize = 15.sp,
-                        color = Color.White
+                        color = Color.White,
+                        modifier = Modifier.padding(top = 9.dp)
                     )
                     Text(
                         text = "Gerardo Amezquita",
                         fontSize = 25.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
-
                     )
                 }
-
             }
-            //Albums
+        }
+
+
+        item {
             Row(
-                modifier = Modifier
-                    .padding(top = 22.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Albums",
                     fontWeight = FontWeight.Bold,
                     fontSize = 21.sp
                 )
-                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "See more",
                     color = Color(0xFF6B2EFF),
-
+                    fontWeight = FontWeight.SemiBold
                 )
             }
-            //LazyRow Albums
-            val BASE_URL = "https://music.juanfrausto.com/api/"
-            var counter by remember {
-                mutableIntStateOf(0)
-            }
-            var albums by remember {
-                mutableStateOf(listOf<Albums>())
-            }
-            var loading by remember {
-                mutableStateOf(true)
-            }
+        }
 
-            LaunchedEffect(true) {
-                try {
-                    Log.i("MainApp", "Creando Instancia de Retrofit")
-                    //Instancia de Retrofit
-                    val retrofit = Retrofit.Builder()
-                        .baseUrl(BASE_URL)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build()
-                    val service = retrofit.create(AlbumsService::class.java)
-                    val result = withContext(Dispatchers.IO) {
-                        service.getAllAlbums()
-                    }
-                    Log.i("MainApp", "El resultado es: ${result.toString()}")
-                    albums = result
-                    loading = false
 
-                } catch (e: Exception) {
-                    Log.e("MainApp", "Algo fallo: ${e.toString()}")
-                    loading = false
-                }
-            }
-
+        item {
             if (loading) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxWidth()
+                        .height(220.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
             } else {
                 LazyRow(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .size(500.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(albums) { album ->
                         AlbumCard(albums = album)
-
                     }
                 }
-
             }
+        }
 
 
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recently Played",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 21.sp
+                )
+                Text(
+                    text = "See more",
+                    color = Color(0xFF6B2EFF),
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+
+
+        if (!loading) {
+            items(albums.take(4)) { album ->
+                RecentlyPlayedCard(albums = album)
+            }
         }
     }
-
 }
+
 
 @Preview(
     showBackground = true,
