@@ -1,12 +1,10 @@
 package com.example1.gamezquitamusicapp.components
 
-import android.R
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,20 +29,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example1.gamezquitamusicapp.models.Albums
 import com.example1.gamezquitamusicapp.ui.theme.GAmezquitaMusicAppTheme
+import com.google.gson.Gson
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 
 @Composable
-fun AlbumCard(albums: Albums){
+fun AlbumCard(albums: Albums, navController: NavHostController){
     Box(
         modifier = Modifier
             .width(180.dp)
             .height(220.dp)
             .clip(RoundedCornerShape(20.dp))
-
+            .clickable {
+                val albumJson = Gson().toJson(albums)
+                val encodedAlbum = URLEncoder.encode(albumJson, StandardCharsets.UTF_8.toString())
+                navController.navigate("albumDetail/$encodedAlbum")
+            }
     ) {
 
         AsyncImage(
@@ -122,6 +128,7 @@ fun AlbumCard(albums: Albums){
 @Composable
 fun AlbumCardPreview(){
     GAmezquitaMusicAppTheme {
+        val nav = rememberNavController()
         AlbumCard(
             albums = Albums(
                 title = "Tales of Ithiria",
@@ -129,7 +136,8 @@ fun AlbumCardPreview(){
                 description = "Popular song",
                 image = "",
                 id = "682243ecf60db4caa642a48c",
-            )
+            ),
+            navController = nav
         )
     }
 }
