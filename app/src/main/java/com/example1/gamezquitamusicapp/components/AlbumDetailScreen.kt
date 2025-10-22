@@ -233,7 +233,7 @@ fun AlbumDetailScreen(album: Albums, navController: NavController) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(8.dp)
+                .padding(horizontal = 12.dp, vertical = 60.dp)
         ) {
             MiniPlayerBar(albums = album)
         }
