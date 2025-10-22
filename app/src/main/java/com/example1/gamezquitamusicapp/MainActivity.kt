@@ -51,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example1.gamezquitamusicapp.components.AlbumCard
+import com.example1.gamezquitamusicapp.components.MiniPlayerBar
 import com.example1.gamezquitamusicapp.components.RecentlyPlayedCard
 import com.example1.gamezquitamusicapp.models.Albums
 import com.example1.gamezquitamusicapp.services.AlbumsService
@@ -75,9 +76,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun MainApp() {
-    // Estados y Retrofit
+
     val BASE_URL = "https://music.juanfrausto.com/api/"
     var albums by remember { mutableStateOf(listOf<Albums>()) }
     var loading by remember { mutableStateOf(true) }
@@ -100,134 +102,147 @@ fun MainApp() {
     }
 
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF1E4FF))
-            .padding(horizontal = 25.dp, vertical = 42.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-
-
-        item {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(28.dp))
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFF9C6BFF),
-                                Color(0xFF7B47F5)
-                            )
-                        )
-                    )
-                    .fillMaxWidth()
-                    .height(140.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxSize()
-                ) {
-                    Row {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = Color.White
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = Color.White
-                        )
-                    }
-                    Text(
-                        text = "Good Morning!",
-                        fontSize = 15.sp,
-                        color = Color.White,
-                        modifier = Modifier.padding(top = 9.dp)
-                    )
-                    Text(
-                        text = "Gerardo Amezquita",
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+    Scaffold(
+        bottomBar = {
+            if (albums.isNotEmpty()) {
+                MiniPlayerBar(albums = albums.first())
             }
         }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF1E4FF))
+                .padding(
+                    start = 25.dp,
+                    end = 25.dp,
+                    top = 42.dp,
+                    bottom = innerPadding.calculateBottomPadding()
+                ),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
 
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Albums",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 21.sp
-                )
-                Text(
-                    text = "See more",
-                    color = Color(0xFF6B2EFF),
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-
-
-        item {
-            if (loading) {
+            item {
                 Box(
                     modifier = Modifier
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF9C6BFF),
+                                    Color(0xFF7B47F5)
+                                )
+                            )
+                        )
                         .fillMaxWidth()
-                        .height(220.dp),
-                    contentAlignment = Alignment.Center
+                        .height(140.dp)
                 ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(albums) { album ->
-                        AlbumCard(albums = album)
+                    Column(
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .fillMaxSize()
+                    ) {
+                        Row {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                tint = Color.White
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = Color.White
+                            )
+                        }
+                        Text(
+                            text = "Good Morning!",
+                            fontSize = 15.sp,
+                            color = Color.White,
+                            modifier = Modifier.padding(top = 9.dp)
+                        )
+                        Text(
+                            text = "Gerardo Amezquita",
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     }
                 }
             }
-        }
 
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Recently Played",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 21.sp
-                )
-                Text(
-                    text = "See more",
-                    color = Color(0xFF6B2EFF),
-                    fontWeight = FontWeight.SemiBold
-                )
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Albums",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 21.sp
+                    )
+                    Text(
+                        text = "See more",
+                        color = Color(0xFF6B2EFF),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
-        }
+
+            item {
+                if (loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(220.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(albums) { album ->
+                            AlbumCard(albums = album)
+                        }
+                    }
+                }
+            }
 
 
-        if (!loading) {
-            items(albums.take(4)) { album ->
-                RecentlyPlayedCard(albums = album)
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Recently Played",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 21.sp
+                    )
+                    Text(
+                        text = "See more",
+                        color = Color(0xFF6B2EFF),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            if (!loading) {
+                items(albums.take(4)) { album ->
+                    RecentlyPlayedCard(albums = album)
+                }
             }
         }
     }
 }
+
+
 
 
 @Preview(
